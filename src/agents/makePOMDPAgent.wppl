@@ -490,7 +490,7 @@ var getSimulateFunction = function(beliefOrBeliefDelay){
     var terminateAfterAction = useManifestLatent ? startState.manifestState.terminateAfterAction :
         startState.terminateAfterAction;
     
-    assert.ok(totalTime > 1 || startState.manifestState.terminateAfterAction, 
+    assert.ok(totalTime > 1 || terminateAfterAction, 
               'if totalTime==1, must also terminateAfterAction');
 
     // agent methods

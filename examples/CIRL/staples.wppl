@@ -1,0 +1,88 @@
+var makeStapleWorld = function(staplesRatio, possibleStapleRatios) { 
+
+  var start = { 
+    period : 'H', 
+    staples : 0, 
+    paperclips : 0,
+    staplesRatio : staplesRatio,
+    timeLeft : 2
+  };
+
+  var transition = function(state, action) { 
+    if (state.period === 'H') {
+      return {
+        period : 'R', 
+        staples : action.human[state.staplesRatio][0], 
+        paperclips : action.human[state.staplesRatio][1],
+        staplesRatio : staplesRatio
+      };
+
+    } else if (state.period === 'R') { 
+      return { 
+        period : 'end',
+        staples : action.robot[0], 
+        paperclips : action.robot[1],
+        staplesRatio : staplesRatio,
+        terminateAfterAction : true
+      };
+    } else { 
+      return state;
+    }
+  }
+
+  var observe = function(state) { 
+    return _.omit(state, 'staplesRatio');
+  };
+
+  var beliefToActions = function (belief) { 
+    var state = sample(belief);
+    var humanActions = [ [0, 2], [1, 1], [2, 0]]; 
+    var robotActions = [ [0, 90], [50, 50], [90, 0]]; 
+
+    if (state.period === 'H') { 
+      var responses = map(function (a) { return humanActions }, _.range(possibleStapleRatios.length))
+      var humanPolicies = map(function(responses) { return _.object(possibleStapleRatios, responses); }, 
+          GridWorld.cartesianProductOf.apply(null, responses));
+      return map(function (policy) { return { human : policy, robot : undefined }; }, humanPolicies);
+
+    } else if (state.period === 'R') {
+      return map(function (action) { return {human : undefined, robot : action }; }, robotActions);
+    } else { 
+      return [ 'a'];
+    }
+  };
+
+  return {
+    observe : observe,
+    transition : transition,
+    beliefToActions : beliefToActions,
+    start : start
+  };
+}
+
+
+var possibleStapleRatios = [.49, .5, .51];
+var actualStapleRatio = .49;
+var world = makeStapleWorld(actualStapleRatio, possibleStapleRatios);
+
+var utility = function(state, action) { 
+
+  var staplesu = state.staples*state.staplesRatio 
+  var paperclipsu = state.paperclips*(1-state.staplesRatio);
+  return staplesu + paperclipsu;
+};
+
+var prior = Enumerate(function () {
+  return { period : 'H', staples : 0, paperclips : 0, staplesRatio : uniformDraw(possibleStapleRatios), timeLeft : 2};
+});
+
+var agent = makePOMDPAgentOptimal(
+    { utility : utility, 
+      priorBelief : prior,
+      useManifestLatent : false,
+    },
+    world);
+
+var t = simulatePOMDPAgent(world.start, world, agent, 'stateAction');
+console.log(JSON.stringify(t));
+t
