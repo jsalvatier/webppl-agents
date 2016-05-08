@@ -14,7 +14,7 @@ var makeStapleWorld = function(staplesRatio, possibleStapleRatios) {
         period : 'R', 
         staples : action.human[state.staplesRatio][0], 
         paperclips : action.human[state.staplesRatio][1],
-        staplesRatio : staplesRatio
+        staplesRatio : state.staplesRatio
       };
 
     } else if (state.period === 'R') { 
@@ -22,7 +22,7 @@ var makeStapleWorld = function(staplesRatio, possibleStapleRatios) {
         period : 'end',
         staples : action.robot[0], 
         paperclips : action.robot[1],
-        staplesRatio : staplesRatio,
+        staplesRatio : state.staplesRatio,
         terminateAfterAction : true
       };
     } else { 
@@ -61,8 +61,8 @@ var makeStapleWorld = function(staplesRatio, possibleStapleRatios) {
 }
 
 
-var possibleStapleRatios = [.49, .5, .51];
-var actualStapleRatio = .49;
+var possibleStapleRatios = [0, .49, .5, .51, 1];
+var actualStapleRatio = .51;
 var world = makeStapleWorld(actualStapleRatio, possibleStapleRatios);
 
 var utility = function(state, action) { 
@@ -83,6 +83,6 @@ var agent = makePOMDPAgentOptimal(
     },
     world);
 
-var t = simulatePOMDPAgent(world.start, world, agent, 'stateAction');
-console.log(JSON.stringify(t));
-t
+var a = simulatePOMDPAgent(world.start, world, agent, 'stateAction');//'stateAction');
+console.log(a)
+  a
