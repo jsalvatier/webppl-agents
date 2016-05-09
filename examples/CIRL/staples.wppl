@@ -1,12 +1,5 @@
-var makeStapleWorld = function(staplesRatio, possibleStapleRatios) { 
+var makeStapleWorld = function(possibleStapleRatios) { 
 
-  var start = { 
-    period : 'H', 
-    staples : 0, 
-    paperclips : 0,
-    staplesRatio : staplesRatio,
-    timeLeft : 2
-  };
 
   var transition = function(state, action) { 
     if (state.period === 'H') {
@@ -63,7 +56,14 @@ var makeStapleWorld = function(staplesRatio, possibleStapleRatios) {
 
 var possibleStapleRatios = [0, .49, .5, .51, 1];
 var actualStapleRatio = .51;
-var world = makeStapleWorld(actualStapleRatio, possibleStapleRatios);
+var start = { 
+  period : 'H', 
+  staples : 0, 
+  paperclips : 0,
+  staplesRatio : actualStapleRatio,
+  timeLeft : 2
+};
+var world = makeStapleWorld(possibleStapleRatios);
 
 var utility = function(state, action) { 
 
@@ -83,6 +83,6 @@ var agent = makePOMDPAgentOptimal(
     },
     world);
 
-var a = simulatePOMDPAgent(world.start, world, agent, 'stateAction');//'stateAction');
+var a = simulatePOMDPAgent(start, world, agent, 'stateAction');//'stateAction');
 console.log(a)
   a
